@@ -1,0 +1,176 @@
+#include <iostream>
+#include <cstdlib>
+using namespace std;
+int stack[10];
+int indice=0, top=-1;
+typedef struct node{
+ int rotulo;
+ struct node *prox;
+}no;
+typedef struct {// digraph: directed graph
+ int arestas, vertices;
+ int *visitado;
+ int *indeg, *outdeg;
+ no **adj;
+ int *id;
+ int *low;
+ int *onstack;
+}gr;
+
+int minn(int a, int b){
+ if(a<b) return a;
+ else return b;
+}
+
+int inicializa(gr *g, int v){
+ g->vertices=v;
+ g->visitado=(int*) malloc(v*sizeof(int));
+ g->indeg=(int*) malloc(v*sizeof(int));
+ g->outdeg=(int*) malloc(v*sizeof(int));
+ g->onstack=(int*) malloc(v*sizeof(int));
+ g->low=(int*) malloc(v*sizeof(int));
+ g->id=(int*) malloc(v*sizeof(int));
+ if(g->visitado==NULL || g->indeg==NULL || g->outdeg==NULL) return 0;
+ g->adj=(no**)malloc(v*sizeof(no*));
+ if(g->adj==NULL) return 0;
+ int i;
+ for(i=0; i<v; i++)
+  {
+  g->adj[i]=NULL;
+  g->indeg[i]=g->outdeg[i]=g->visitado[i]=g->onstack[i]=g->low[i]=0;
+  g->id[i]=-1;
+ }
+ g->arestas=0;
+ return 1;
+}
+int novaaresta(gr *g, int a, int b){
+ if (a<g->vertices && b<g->vertices){
+  no* aux=(no*) malloc (sizeof(no));
+  if (!aux) return 0;
+  aux->rotulo=b;
+  aux->prox=g->adj[a];
+  g->adj[a]=aux;
+  g->indeg[b]++;
+  g->outdeg[a]++;
+  g->arestas++;
+  return 1;
+ }
+ return 0;
+}
+void print(gr *g){
+ int j;
+ no *k;
+ cout<<"Lista de Adjacencias"<<endl;
+ for (j=0; j<g->vertices; j++){
+  cout<<j<<" -> ";
+  for(k=g->adj[j]; k!=NULL; k=k->prox){
+   cout<<k->rotulo<<" -> ";
+  }
+  cout<<endl;
+ }
+}
+void dfs_visit(gr *g, int i){
+ cout<<i<<", ";
+ no *j;
+ for(j=g->adj[i]; j!=NULL; j=j->prox){
+  if (g->visitado[j->rotulo] == 0){
+   g->visitado[j->rotulo]=1;
+   dfs_visit(g, j->rotulo);
+  }
+ }
+}
+void dfs(gr *g){
+ for (int i=7; i<g->vertices; i++){
+  if (g->visitado[i]==0){
+   g->visitado[i]=1;
+   dfs_visit(g, i);
+   if(i==7) i=0;
+  }
+ }
+}
+void zerar(gr *g){
+ for(int i=0; i<g->vertices; i++){
+  g->visitado[i]=0;
+ }
+}
+void buscal(gr *g, int i){
+ int fi=0, tf=1;// fila inicio, tamanho da fila
+ int fila[g->vertices];// fila
+ fila[fi]=i;// início da fila é o valor do nó inical
+ g->visitado[i]=1;// o primeiro nó foi visitado
+ cout<<i<<", ";
+ while(fi<tf){
+  for(no *j=g->adj[fila[fi]]; j!=NULL; j=j->prox){
+   //j percorre os vizinhos do valor no inicio da fila	
+   if(g->visitado[j->rotulo]==0){// se o vizinho não foi visitado, adiciona na fila e marca como visitado
+    cout<<j->rotulo<<", ";
+    g->visitado[j->rotulo]=1;
+    fila[tf]=j->rotulo;
+    tf++;
+   }
+  }
+  fi++;// próximo elemento da fila
+ }
+ zerar(g);
+}
+void dfstarjan(gr *g, int v){
+ g->id[v]=indice;
+ g->low[v]=indice;
+ indice++;
+ top++;
+ stack[top]=v;
+ g->onstack[v]=1;
+ for(no *j=g->adj[v]; j!=NULL; j=j->prox){
+  if(g->id[j->rotulo]==-1){
+   dfstarjan(g, j->rotulo);
+   g->low[v]=minn(g->low[v], g->low[j->rotulo]);
+  }
+  else if(g->onstack[j->rotulo]) g->low[v]=minn(g->low[v], g->low[j->rotulo]);
+ }
+ if(g->low[v]==g->id[v]){
+  cout<<"//";
+  int thelow=g->low[v];
+  while(thelow==g->low[v] && top>-1){
+   g->onstack[stack[top]]=0;
+   cout<<stack[top]<<", ";
+   top--;
+   thelow=g->low[stack[top]];
+  }
+ }
+}
+void tarjan(gr *g){
+ for(int i=7; i<g->vertices; i++){
+  if(g->id[i]==-1){
+  dfstarjan(g, i);
+  }
+  if(i==7) i=0;
+ }
+}
+int main(){
+ gr G;
+ inicializa(&G, 8);
+ novaaresta(&G, 0, 1);
+ novaaresta(&G, 1, 2);
+ novaaresta(&G, 2, 0);
+ novaaresta(&G, 3, 1);
+ novaaresta(&G, 3, 2);
+ novaaresta(&G, 3, 4);
+ novaaresta(&G, 4, 3);
+ novaaresta(&G, 4, 5);
+ novaaresta(&G, 5, 2);
+ novaaresta(&G, 5, 6);
+ novaaresta(&G, 6, 5);
+ novaaresta(&G, 7, 4);
+ novaaresta(&G, 7, 6);
+ novaaresta(&G, 7, 7);
+ print(&G);
+ cout<<endl<<endl<<"Busca em profundidade"<<endl;
+ dfs(&G);
+ zerar(&G);
+ cout<<endl<<endl;
+ int lista[10];
+ cout<<endl<<"Tarjan"<<endl;
+ indice=top=0;
+ tarjan(&G);
+ return 0;
+}

@@ -1,0 +1,46 @@
+    xAlgoritmo	Estrutura De Dados	Complexidade do Tempo:
+Melhor Caso
+
+Complexidade do Tempo:
+Caso Médio
+
+Complexidade do Tempo:
+Pior Caso
+
+Espaço de Complexidade:
+Pior Caso
+
+Quick Sort	Array	O(n log(n))	O(n log(n))	O(n2)	O(log(n))
+Merge sort	Array	O(n log(n))	O(n log(n))	O(n log(n))	O(n)
+Heap sort	Array	O(n log(n))	O(n log(n))	O(n log(n))	O(1)
+Smooth sort	Array	O(n)	O(n log(n))	O(n log(n))	O(1)
+Bubble sort	Array	O(n)	O(n2)	O(n2)	O(1)
+Insertion sort
+Array	O(n)	O(n2)	O(n2)	O(1)
+Selection sort	Array	O(n2)	O(n2)	O(n2)	O(1)
+
+
+
+utiliza um array auxiliar para contar quantas vezes cada valor ocorre no array a ser ordenado. 
+Neste caso, o valor a ser ordenado é tratado como índice do array auxiliar.
+
+#define max 100
+
+void counting_sort(int *v, int n)
+{
+    int i,j,k;
+    int baldes[max];
+
+    for(i=0; i<max; i++)
+    {
+        baldes[v[i]]++;
+    }
+
+    for(i=0, j=0; j<max; j++)
+    {
+        for(k=baldes[j]; k>0; k--)
+        v[i++]= j;
+    }
+}
+
+

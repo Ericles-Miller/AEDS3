@@ -1,0 +1,19 @@
+a- O(n)
+b- O(n^2)
+c- O(sqrt(n))
+d- O(sqrt(n))
+e- 50n+50n^2 => O(n^2)
+f- O(log2(n))
+g- O(n^4)
+h- O(n^2*lg(n))
+i- for(j=1; j<=n; j=j*2)	O(n(log2(n))^2)
+j- O(log2(n))
+k- O(n*lg(n))
+
+
+
+
+
+
+i	1 2	3	4	n
+j	n n/2	n/3	n/4	1

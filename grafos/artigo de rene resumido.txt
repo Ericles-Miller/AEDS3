@@ -1,0 +1,112 @@
+Our reachability index represents non-planar DAGs in a
+two dimensional plane by assigning to each vertex u a unique
+coordinate (i. e., a pair of integers (xu, yu)) in the N
+2 plane,
+preserving the reachability relations between most pairs of
+vertices. Graphically, we translate reachability to the relation “being at the upper-right”, that is, both coordinates
+of a vertex v, reachable from another vertex u, need to be
+greater than or equal to the respective coordinates of u,
+necessarily. When this geometrical relation holds, we verify the reachability through a search in a reduced part of
+the graph, identified from the index. When it does not, the
+non-reachability is decided in constant time.
+Based on this index, we present in this paper a novel indexing method called FELINE (Fast rEfined onLINE search).
+In particular, we make the following original contributions:
+
+2-RABALHO RELATADO
+Como mencionado, Jin et al. [18] divide as abordagens existentes em três classes: compressão transitiva do fechamento,
+Rotulagem de lúpulo e pesquisa on-line refinada. Os métodos de
+a primeira classe [1, 8, 21, 26, 33, 34] comprime o transitivo
+fechamento das arestas para atribuir a cada vértice um conjunto compactado de alcançabilidade. Assim, determinamos a acessibilidade entre
+dois vértices, verificando se o vértice de destino é
+no conjunto compactado de alcançabilidade do vértice de origem. o
+segunda classe é chamada Hop Labeling [10, 11, 16, 20, 27] e
+seus métodos usam vértices intermediários para codificar a acessibilidade entre dois outros vértices. Em geral, cada nó
+mantém uma lista de vértices intermediários que ele pode alcançar,
+e uma lista de vértices intermediários que podem alcançá-lo. Conseqüentemente, para responder às consultas, é feita uma operação de junção
+entre as listas para determinar a ocorrência de vértices em
+comum. Na terceira classe, como proposto por [7, 28, 31, 35],
+as abordagens são baseadas no uso de pesquisas online. Em
+Nesse caso, eles usam um esquema para rotular os vértices para
+podar agressivamente o espaço de pesquisa, minimizando o número de vértices a serem expandidos. No entanto, o gráfico original
+deve ser mantido na memória para permitir as pesquisas,
+que geralmente é da moda do DFS.
+
+3-Significado gráfico
+Dado um DAG G, todo vértice é associado a um par
+(x, y) ∈ N
+2
+de modo que, para quaisquer dois vértices u, v ∈ G, se houver
+um caminho direcionado de u para v, então a coordenada x de u é menor
+igual ou igual à coordenada x de v e coordenada y de u
+é menor ou igual à coordenada y de v. A Figura 2 mostra
+um exemplo de um DAG pequeno e o índice do tamanho O (| V |).
+O índice resultante pode ser representado graficamente. o
+par de números inteiros (x, y) associado a um vértice é entendido
+como coordenadas no plano cartesiano.
+O teorema 1 significa graficamente que, para um dado vértice u,
+temos apenas que verificar seu quadrante superior direito, para
+identifique os vértices que podem ser alcançados a partir de u. Se não,
+a acessibilidade é respondida negativamente em tempo constante.
+As relações entre os vértices (ou pontos no
+plano) são ilustrados na Figura 3, onde as linhas tracejadas
+expresse a área de acessibilidade começando em cada vértice. Para
+Por exemplo, considere os vértices a e h. Para r (a, h), temos necessariamente i (a) i (h) (por Th. 1) e, de fato, os chocados
+área a partir do ponto i (a) = (1, 4) inclui o ponto i (h) = (7, 8). Também podemos ver na figura que d não é
+no quadrante superior direito de b, i. e., i (b) i (d). Usando o
+contraposição de Th. 1, concluímos que d não é alcançável
+de b.
+Infelizmente, o índice não permite responder positivamente a uma consulta em tempo constante. Em outros termos, Th. 1 estados
+que ∀ (u, v) ∈ V
+2
+, r (u, v) ⇒ i (u) i (v), mas o inverso
+nem sempre a implicação é válida. A Figura 4 mostra uma coroa
+DAG conhecido como S
+0 0
+3 gráfico. No índice relacionado, temos
+i (u) i (v) mesmo que r (u, v) seja falso, representado por um tracejado
+seta entre os vértices u e v (falso positivo). Outro
+exemplo é o vértice d nas figuras 2 e 3, onde, para o
+vértice h, i (h) está no quadrante superior direito de i (d), mas
+não é alcançável de acordo com o gráfico (da Figura 2- (A)).
+É importante notar que alguns gráficos, como S
+0 0
+3
+não admita um índice 2D livre de falsos positivos. Em
+De fato, existem gráficos problemáticos para a construção de
+qualquer índice nD com n arbitrariamente grande [14, 23]. Sabe-se que o problema de minimizar o número de falsos positivos
+ser NP-difícil [23, 24], mas podemos gerar uma aproximação
+solução localmente ideal que minimiza o número de falsos positivos. (Outra solução é mostrada mais adiante neste artigo por
+aplicando uma otimização chamada filtro de corte positivo.)
+
+3-2
+Construção do Índice
+O algoritmo 1 gera as coordenadas que comporão
+o índice FELINE. As coordenadas x são determinadas primeiro
+por um algoritmo de ordenação topológica (linha 2), resultando na
+conjunto de coordenadas X. Qualquer algoritmo de ordenação topológica
+pode ser usado (um tempo O (| V | + | E |) é encontrado em [12]).
+Algoritmo 1: Construção de Índice
+Dados: (V, E), um gráfico acíclico direcionado cujo conjunto de vértices, V,
+é o conjunto de números inteiros de 1 a | V | e E ⊂ V
+2
+Resultado: (X, Y), dois vetores de tamanho | V | de modo que ∈u ∈ V,
+
+begin
+2 X ← TopologicalOrdering(V,E);
+3 Y ← ∅;
+4 heads ← (∅, . . . , ∅);
+5 d ← (0, . . . , 0);
+6 forall the (u, v) ∈ E do
+7 headsu ← headsu ∪ {v};
+8 dv ← dv + 1;
+9 roots ← {v ∈ V | dv = 0};
+10 while roots 6= ∅ do
+11 u ← arg maxv∈roots (Xv );
+// Append u to Y
+12 Y ← (Y, u);
+// Update d and the roots set
+13 roots ← roots \{u};
+14 forall the v ∈ headsu do
+15 dv ← dv − 1;
+16 if dv = 0 then
+17 roots ← roots ∪{v};
